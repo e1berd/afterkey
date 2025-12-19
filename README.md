@@ -1,6 +1,6 @@
 # AfterKey
 
-<div>
+<div style="width: 400px; height: 400px;">
   <video style="width: 400px; height: 400px;" autoplay loop muted playsinline src="https://raw.githubusercontent.com/e1berd/afterkey/docs/preview.mp4"></video>
 </div>
 
