@@ -1,6 +1,6 @@
 # AfterKey
 
-<video src="docs/preview.mp4" controls autoplay loop muted playsinline width="100%"></video>
+<video src="https://user-images.githubusercontent.com/e1berd/afterkey/docs/preview.mp4" controls autoplay loop muted playsinline width="100%"></video>
 
 
 A simple and minimalistic keystroke overlay for macOS. 
