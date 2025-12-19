@@ -17,7 +17,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusBarItem: NSStatusItem!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Иконка в меню-баре
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusBarItem.button {
             button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Key Overlay")
@@ -25,13 +24,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.sendAction(on: [.leftMouseDown, .rightMouseDown])
         }
 
-        // Меню для иконки
         let menu = NSMenu()
         let quitItem = NSMenuItem(title: "Quit AfterKey", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
         menu.addItem(quitItem)
         statusBarItem.menu = menu
 
-        // Overlay окно
         let screenFrame = NSScreen.main?.frame ?? .zero
 
         overlayWindow = NSWindow(
@@ -57,7 +54,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func statusBarButtonClicked(_ sender: NSStatusItem) {
-        // По клику можно добавить действия (пока просто меню с Quit)
     }
 }
 
