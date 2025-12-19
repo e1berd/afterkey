@@ -1,7 +1,7 @@
 # AfterKey
 
 
-![AfterKey preview](docs/preview.gif)
+![AfterKey preview](./docs/preview.gif)
 
 A simple and minimalistic keystroke overlay for macOS. 
 Shows the keys pressed in the lower right corner of the screen as translucent buttons
