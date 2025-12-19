@@ -14,8 +14,24 @@ struct afterkeyApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: NSWindow!
     var monitor = KeyMonitor()
+    var statusBarItem: NSStatusItem!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Иконка в меню-баре
+        statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusBarItem.button {
+            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "Key Overlay")
+            button.action = #selector(statusBarButtonClicked(_:))
+            button.sendAction(on: [.leftMouseDown, .rightMouseDown])
+        }
+
+        // Меню для иконки
+        let menu = NSMenu()
+        let quitItem = NSMenuItem(title: "Quit AfterKey", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        menu.addItem(quitItem)
+        statusBarItem.menu = menu
+
+        // Overlay окно
         let screenFrame = NSScreen.main?.frame ?? .zero
 
         overlayWindow = NSWindow(
@@ -38,6 +54,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         overlayWindow.orderFront(nil)
 
         monitor.start()
+    }
+
+    @objc func statusBarButtonClicked(_ sender: NSStatusItem) {
+        // По клику можно добавить действия (пока просто меню с Quit)
     }
 }
 
@@ -149,9 +169,9 @@ class KeyMonitor: ObservableObject {
                 var char = nsEvent.characters ?? ""
 
                 switch keycode {
-                case 49: char = "␣"      // Space
-                case 36: char = "↵"      // Enter
-                case 51: char = "⌫"      // Backspace
+                case 49: char = "␣"
+                case 36: char = "↵"
+                case 51: char = "⌫"
                 case 48: char = "Tab"
                 case 53: char = "Esc"
                 case 123: char = "←"
