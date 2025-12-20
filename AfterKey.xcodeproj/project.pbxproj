@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		0B0277152EF62CAB0091E857 /* AfterKey.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AfterKey.xcodeproj; sourceTree = "<group>"; };
 		0B503F032EF6056B007B1831 /* AfterKey.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AfterKey.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0B503F142EF6059D007B1831 /* AfterKey.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = AfterKey.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -30,6 +31,11 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B0277162EF62CAB0091E857 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		0B503EFA2EF6056B007B1831 = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +110,10 @@
 			productRefGroup = 0B503F042EF6056B007B1831 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 0B0277162EF62CAB0091E857 /* Products */;
+					ProjectRef = 0B0277152EF62CAB0091E857 /* AfterKey.xcodeproj */;
+				},
 				{
 					ProductGroup = 0B503F152EF6059D007B1831 /* Products */;
 					ProjectRef = 0B503F142EF6059D007B1831 /* AfterKey.xcodeproj */;

@@ -264,7 +264,7 @@ struct OverlayView: View {
         ZStack {
             Color.clear
 
-            VStack {ываыв
+            VStack {
                 if settings.position.alignment.vertical != .top { Spacer() }
 
                 VStack(spacing: 8) {
@@ -299,7 +299,7 @@ struct OverlayView: View {
 // MARK: - Key Monitor
 class KeyMonitor: ObservableObject {
     @Published var recentKeys: [KeyDisplay] = []
-    @StateObject private var settings = SettingsManager.shared
+    private let settings = SettingsManager.shared
 
     struct KeyDisplay: Identifiable {
         let id = UUID()
@@ -334,7 +334,8 @@ class KeyMonitor: ObservableObject {
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: eventTap, enable: true)
 
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
             DispatchQueue.main.async {
                 let now = Date()
                 withAnimation {
@@ -347,7 +348,9 @@ class KeyMonitor: ObservableObject {
     private func handleEvent(type: CGEventType, cgEvent: CGEvent) {
         guard let nsEvent = NSEvent(cgEvent: cgEvent) else { return }
 
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
             var mods = ""
             if self.settings.showModifiers {
                 let flags = nsEvent.modifierFlags
