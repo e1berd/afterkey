@@ -7,9 +7,9 @@ enum OverlayPosition: String, CaseIterable, Identifiable {
     case topLeft, topCenter, topRight
     case centerLeft, center, centerRight
     case bottomLeft, bottomCenter, bottomRight
-    
+
     var id: String { self.rawValue }
-    
+
     var alignment: Alignment {
         switch self {
         case .topLeft: return .topLeading
@@ -32,9 +32,9 @@ struct afterkeyApp: App {
 
     var body: some Scene {
         // Стандартное окно настроек SwiftUI
-        Settings {
-            SettingsView(monitor: delegate.monitor)
-        }
+        // Settings {
+        //     SettingsView(monitor: delegate.monitor)
+        // }
     }
 }
 
@@ -46,12 +46,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
-        
+
         setupStatusBar()
         setupOverlayWindow()
         monitor.start()
     }
-    
+
     func setupStatusBar() {
         statusBarItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusBarItem.button {
@@ -59,14 +59,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         let menu = NSMenu()
-        // В macOS 13+ для настроек рекомендуется использовать SettingsLink в View,
-        // но из меню мы вызываем стандартный селектор.
-        menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
-        menu.addItem(NSMenuItem.separator())
+        // menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
+        // menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit AfterKey", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         statusBarItem.menu = menu
     }
-    
+
     @objc func openSettings() {
         NSApp.activate(ignoringOtherApps: true)
         // Правильный способ вызова окна настроек для новых macOS
@@ -94,10 +92,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         overlayWindow.hasShadow = false
         overlayWindow.ignoresMouseEvents = true
         overlayWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        
+
         // Устанавливаем панель как неактивируемую через свойство класса, если нужно
         // Но для overlay обычно достаточно уровня окна
-        
+
         let hostingView = NSHostingView(rootView: OverlayView().environmentObject(monitor))
         overlayWindow.contentView = hostingView
         overlayWindow.orderFront(nil)
@@ -115,14 +113,14 @@ struct SettingsView: View {
                     Text("Display Duration: \(monitor.displayDuration, specifier: "%.1f")s")
                     Slider(value: $monitor.displayDuration, in: 1...10, step: 0.5)
                 }
-                
+
                 Stepper("Max Items: \(monitor.maxKeys)", value: $monitor.maxKeys, in: 1...15)
             } header: {
                 Text("General Settings")
             }
-            
+
             Divider()
-            
+
             Section {
                 Picker("Position", selection: $monitor.position) {
                     ForEach(OverlayPosition.allCases) { pos in
@@ -132,7 +130,7 @@ struct SettingsView: View {
             } header: {
                 Text("Layout")
             }
-            
+
             // Кнопка для быстрого доступа к системным настройкам (Accessibility)
             Section {
                 Button("Open Privacy Settings") {
@@ -156,7 +154,7 @@ struct OverlayView: View {
 
             VStack {
                 if monitor.position.alignment.vertical != .top { Spacer() }
-                
+
                 VStack(spacing: 8) {
                     ForEach(monitor.recentKeys) { row in
                         Text(row.text)
@@ -188,7 +186,7 @@ struct OverlayView: View {
 // MARK: - Key Monitor
 class KeyMonitor: ObservableObject {
     @Published var recentKeys: [KeyDisplay] = []
-    
+
     @AppStorage("displayDuration") var displayDuration: Double = 3.0
     @AppStorage("maxKeys") var maxKeys: Int = 5
     @AppStorage("overlayPosition") var position: OverlayPosition = .bottomRight
@@ -252,6 +250,7 @@ class KeyMonitor: ObservableObject {
                 var char = nsEvent.charactersIgnoringModifiers?.uppercased() ?? ""
 
                 switch keycode {
+                case 48:  char = "⇥"
                 case 49: char = "␣"
                 case 36: char = "↵"
                 case 51: char = "⌫"
