@@ -48,7 +48,7 @@ struct afterkeyApp: App {
                 .environmentObject(settings)
         }
         .windowResizability(.contentSize)
-        .defaultSize(width: 400, height: 680)
+        .defaultSize(width: 420, height: 600)
     }
 }
 
@@ -58,85 +58,204 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        Form {
-            Section {
+        ScrollView {
+            VStack(spacing: 20) {
+                // MARK: - General Settings
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Display Duration: \(settings.displayDuration, specifier: "%.1f")s")
-                    Slider(value: $settings.displayDuration, in: 0.5...10, step: 0.5)
-                }
-                .padding(.vertical, 4)
-                // .padding(.top, 120)
-                // .padding(.bottom, 4)
+                    Text("General Settings")
+                        .font(.headline)
+                        .foregroundColor(.primary)
 
-                Stepper("Max Items: \(settings.maxKeys)", value: $settings.maxKeys, in: 1...20)
-                    .padding(.vertical, 4)
+                    VStack(spacing: 16) {
+                        // Display Duration
+                        SettingRow(
+                            title: "Display Duration",
+                            value: "\(settings.displayDuration, default: "%.1f")s",
+                            minValue: 0.5,
+                            maxValue: 10,
+                            step: 0.5,
+                            binding: $settings.displayDuration
+                        )
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Font Size: \(Int(settings.fontSize))")
-                    Slider(value: $settings.fontSize, in: 16...64, step: 2)
-                }
-                .padding(.vertical, 4)
+                        // Max Items
+                        SettingRow(
+                            title: "Max Items",
+                            value: "\(settings.maxKeys)",
+                            minValue: 1,
+                            maxValue: 20,
+                            step: 1,
+                            binding: Binding(
+                                get: { Double(settings.maxKeys) },
+                                set: { settings.maxKeys = Int($0) }
+                            )
+                        )
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Corner Radius: \(Int(settings.cornerRadius))")
-                    Slider(value: $settings.cornerRadius, in: 0...30, step: 2)
-                }
-                .padding(.vertical, 4)
+                        // Font Size
+                        SettingRow(
+                            title: "Font Size",
+                            value: "\(Int(settings.fontSize))",
+                            minValue: 16,
+                            maxValue: 64,
+                            step: 2,
+                            binding: $settings.fontSize
+                        )
 
-                Toggle("Show Modifier Keys", isOn: $settings.showModifiers)
-                    .padding(.vertical, 4)
-            } header: {
-                Text("General Settings")
-                    .font(.headline)
-            }
+                        // Corner Radius
+                        SettingRow(
+                            title: "Corner Radius",
+                            value: "\(Int(settings.cornerRadius))",
+                            minValue: 0,
+                            maxValue: 30,
+                            step: 2,
+                            binding: $settings.cornerRadius
+                        )
 
-            Divider()
-                .padding(.vertical, 8)
-
-            Section {
-                Text("Overlay Position")
-                    .font(.headline)
-                    .padding(.bottom, 8)
-
-                // Grid of positions
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 12) {
-                    ForEach(OverlayPosition.allCases) { position in
-                        PositionButton(
-                            position: position,
-                            isSelected: settings.position == position
-                        ) {
-                            settings.position = position
+                        // Toggles
+                        VStack(spacing: 8) {
+                            Toggle("Show Modifier Keys", isOn: $settings.showModifiers)
+                                .toggleStyle(.switch)
                         }
                     }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(.windowBackgroundColor))
+                    )
                 }
-                .padding(.vertical, 8)
+
+                // MARK: - Position Settings
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Overlay Position")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                        ForEach(OverlayPosition.allCases) { position in
+                            PositionButton(
+                                position: position,
+                                isSelected: settings.position == position
+                            ) {
+                                settings.position = position
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(.windowBackgroundColor))
+                    )
+                }
+
+                // MARK: - Actions
+                VStack(spacing: 12) {
+                    Button(action: {
+                        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+                        NSWorkspace.shared.open(url)
+                    }) {
+                        HStack {
+                            Image(systemName: "lock.shield")
+                                .font(.system(size: 14))
+                            Text("Open Privacy Settings")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.blue.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button(action: {
+                        settings.displayDuration = 3.0
+                        settings.maxKeys = 5
+                        settings.position = .bottomRight
+                        settings.showModifiers = true
+                        settings.fontSize = 32.0
+                        settings.cornerRadius = 12.0
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                                .font(.system(size: 14))
+                            Text("Reset to Defaults")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.red.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(.red)
+                }
+
+                // MARK: - Preview
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Preview")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    Text("Test")
+                        .font(.system(size: CGFloat(settings.fontSize), weight: .bold, design: .rounded))
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(CGFloat(settings.cornerRadius))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: CGFloat(settings.cornerRadius))
+                                .stroke(.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .padding(.horizontal)
+                }
             }
-
-            Divider()
-                .padding(.vertical, 8)
-
-            Section {
-                Button("Open Privacy Settings") {
-                    let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                    NSWorkspace.shared.open(url)
-                }
-
-                Button("Reset to Defaults") {
-                    settings.displayDuration = 3.0
-                    settings.maxKeys = 5
-                    settings.position = .bottomRight
-                    settings.showModifiers = true
-                    settings.fontSize = 32.0
-                    settings.cornerRadius = 12.0
-                }
-                .foregroundColor(.red)
-            }
+            .padding(20)
         }
-        .padding(20)
-        .frame(width: 400, height: 680)
+        .frame(width: 420, height: 600)
     }
 }
 
+// MARK: - Setting Row Component
+struct SettingRow: View {
+    let title: String
+    let value: String
+    let minValue: Double
+    let maxValue: Double
+    let step: Double
+    @Binding var binding: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.primary)
+
+                Spacer()
+
+                Text(value)
+                    .font(.system(size: 13, weight: .medium, design: .monospaced))
+                    .foregroundColor(.secondary)
+            }
+
+            Slider(value: $binding, in: minValue...maxValue, step: step)
+                .controlSize(.small)
+        }
+    }
+}
+
+// MARK: - Updated PositionButton
 struct PositionButton: View {
     let position: OverlayPosition
     let isSelected: Bool
@@ -146,24 +265,23 @@ struct PositionButton: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Image(systemName: iconName(for: position))
-                    .font(.system(size: 16))
+                    .font(.system(size: 14))
                     .foregroundColor(isSelected ? .white : .primary)
-                Text(position.rawValue
-                    .replacingOccurrences(of: "([A-Z])", with: " $1", options: .regularExpression)
-                    .trimmingCharacters(in: .whitespaces)
-                    .capitalized)
-                    .font(.system(size: 10))
+                Text(shortName(for: position))
+                    .font(.system(size: 9, weight: .medium))
                     .foregroundColor(isSelected ? .white : .primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
-            .padding(8)
+            .frame(height: 60)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(isSelected ? Color.blue : Color.gray.opacity(0.2))
+                    .fill(isSelected ? Color.blue : Color.gray.opacity(0.1))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.4), lineWidth: 1)
+                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -171,15 +289,29 @@ struct PositionButton: View {
 
     private func iconName(for position: OverlayPosition) -> String {
         switch position {
-        case .topLeft: return "arrow.up.left.circle"
-        case .topCenter: return "arrow.up.circle"
-        case .topRight: return "arrow.up.right.circle"
-        case .centerLeft: return "arrow.left.circle"
-        case .center: return "circle"
-        case .centerRight: return "arrow.right.circle"
-        case .bottomLeft: return "arrow.down.left.circle"
-        case .bottomCenter: return "arrow.down.circle"
-        case .bottomRight: return "arrow.down.right.circle"
+        case .topLeft: return "arrow.up.left.circle.fill"
+        case .topCenter: return "arrow.up.circle.fill"
+        case .topRight: return "arrow.up.right.circle.fill"
+        case .centerLeft: return "arrow.left.circle.fill"
+        case .center: return "circle.fill"
+        case .centerRight: return "arrow.right.circle.fill"
+        case .bottomLeft: return "arrow.down.left.circle.fill"
+        case .bottomCenter: return "arrow.down.circle.fill"
+        case .bottomRight: return "arrow.down.right.circle.fill"
+        }
+    }
+
+    private func shortName(for position: OverlayPosition) -> String {
+        switch position {
+        case .topLeft: return "Top Left"
+        case .topCenter: return "Top Center"
+        case .topRight: return "Top Right"
+        case .centerLeft: return "Center Left"
+        case .center: return "Center"
+        case .centerRight: return "Center Right"
+        case .bottomLeft: return "Bottom Left"
+        case .bottomCenter: return "Bottom Center"
+        case .bottomRight: return "Bottom Right"
         }
     }
 }
@@ -213,19 +345,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func openSettings() {
-        // Close existing settings window if open
         settingsWindow?.close()
 
-        // Create new settings window
         let settingsView = SettingsView()
             .environmentObject(SettingsManager.shared)
-            .frame(width: 400, height: 680)
 
         let hostingController = NSHostingController(rootView: settingsView)
 
         settingsWindow = NSWindow(contentViewController: hostingController)
         settingsWindow?.title = "AfterKey Settings"
-        settingsWindow?.setContentSize(NSSize(width: 400, height: 680))
+        settingsWindow?.setContentSize(NSSize(width: 420, height: 600))
         settingsWindow?.styleMask = [.titled, .closable, .resizable]
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
