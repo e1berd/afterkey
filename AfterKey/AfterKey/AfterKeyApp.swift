@@ -24,7 +24,6 @@ enum OverlayPosition: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Settings Manager
 class SettingsManager: ObservableObject {
     static let shared = SettingsManager()
 
@@ -34,9 +33,34 @@ class SettingsManager: ObservableObject {
     @AppStorage("showModifiers") var showModifiers: Bool = true
     @AppStorage("fontSize") var fontSize: Double = 32.0
     @AppStorage("cornerRadius") var cornerRadius: Double = 12.0
+
+    @AppStorage("backgroundColorRed") var backgroundColorRed: Double = 0.0
+    @AppStorage("backgroundColorGreen") var backgroundColorGreen: Double = 0.0
+    @AppStorage("backgroundColorBlue") var backgroundColorBlue: Double = 0.0
+    @AppStorage("backgroundOpacity") var backgroundOpacity: Double = 0.3
+    @AppStorage("textColorRed") var textColorRed: Double = 1.0
+    @AppStorage("textColorGreen") var textColorGreen: Double = 1.0
+    @AppStorage("textColorBlue") var textColorBlue: Double = 1.0
+    @AppStorage("textColorOpacity") var textColorOpacity: Double = 1.0
+    @AppStorage("borderWidth") var borderWidth: Double = 1.0
+    @AppStorage("borderColorRed") var borderColorRed: Double = 1.0
+    @AppStorage("borderColorGreen") var borderColorGreen: Double = 1.0
+    @AppStorage("borderColorBlue") var borderColorBlue: Double = 1.0
+    @AppStorage("borderColorOpacity") var borderColorOpacity: Double = 0.2
+
+    var backgroundColor: Color {
+        Color(red: backgroundColorRed, green: backgroundColorGreen, blue: backgroundColorBlue, opacity: backgroundOpacity)
+    }
+
+    var textColor: Color {
+        Color(red: textColorRed, green: textColorGreen, blue: textColorBlue, opacity: textColorOpacity)
+    }
+
+    var borderColor: Color {
+        Color(red: borderColorRed, green: borderColorGreen, blue: borderColorBlue, opacity: borderColorOpacity)
+    }
 }
 
-// MARK: - App Main
 @main
 struct afterkeyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate
@@ -48,185 +72,329 @@ struct afterkeyApp: App {
                 .environmentObject(settings)
         }
         .windowResizability(.contentSize)
-        .defaultSize(width: 420, height: 600)
+        .defaultSize(width: 420, height: 700)
     }
 }
 
-// MARK: - Settings View
 struct SettingsView: View {
     @EnvironmentObject var settings: SettingsManager
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedTab = 0
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // MARK: - General Settings
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("General Settings")
-                        .font(.headline)
-                        .foregroundColor(.primary)
+        VStack(spacing: 0) {
+            Picker("", selection: $selectedTab) {
+                Text("General").tag(0)
+                Text("Appearance").tag(1)
+                Text("Position").tag(2)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 16)
 
-                    VStack(spacing: 16) {
-                        // Display Duration
-                        SettingRow(
-                            title: "Display Duration",
-                            value: "\(settings.displayDuration, default: "%.1f")s",
-                            minValue: 0.5,
-                            maxValue: 10,
-                            step: 0.5,
-                            binding: $settings.displayDuration
-                        )
-
-                        // Max Items
-                        SettingRow(
-                            title: "Max Items",
-                            value: "\(settings.maxKeys)",
-                            minValue: 1,
-                            maxValue: 20,
-                            step: 1,
-                            binding: Binding(
-                                get: { Double(settings.maxKeys) },
-                                set: { settings.maxKeys = Int($0) }
-                            )
-                        )
-
-                        // Font Size
-                        SettingRow(
-                            title: "Font Size",
-                            value: "\(Int(settings.fontSize))",
-                            minValue: 16,
-                            maxValue: 64,
-                            step: 2,
-                            binding: $settings.fontSize
-                        )
-
-                        // Corner Radius
-                        SettingRow(
-                            title: "Corner Radius",
-                            value: "\(Int(settings.cornerRadius))",
-                            minValue: 0,
-                            maxValue: 30,
-                            step: 2,
-                            binding: $settings.cornerRadius
-                        )
-
-                        // Toggles
-                        VStack(spacing: 8) {
-                            Toggle("Show Modifier Keys", isOn: $settings.showModifiers)
-                                .toggleStyle(.switch)
-                        }
+            TabView(selection: $selectedTab) {
+                ScrollView {
+                    VStack(spacing: 20) {
+                        generalSettingsSection
+                        actionsSection
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.windowBackgroundColor))
+                    .padding(20)
+                }
+                .tag(0)
+
+                ScrollView {
+                    VStack(spacing: 20) {
+                        appearanceSettingsSection
+                        actionsSection
+                    }
+                    .padding(20)
+                }
+                .tag(1)
+
+                ScrollView {
+                    VStack(spacing: 20) {
+                        positionSettingsSection
+                        actionsSection
+                    }
+                    .padding(20)
+                }
+                .tag(2)
+            }
+            .frame(height: 600)
+        }
+        .frame(width: 420, height: 700)
+    }
+
+    private var generalSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("General Settings")
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            VStack(spacing: 16) {
+                SettingRow(
+                    title: "Display Duration",
+                    value: "\(settings.displayDuration, default: "%.1f")s",
+                    minValue: 0.5,
+                    maxValue: 10,
+                    step: 0.5,
+                    binding: $settings.displayDuration
+                )
+
+                SettingRow(
+                    title: "Max Items",
+                    value: "\(settings.maxKeys)",
+                    minValue: 1,
+                    maxValue: 20,
+                    step: 1,
+                    binding: Binding(
+                        get: { Double(settings.maxKeys) },
+                        set: { settings.maxKeys = Int($0) }
                     )
-                }
+                )
 
-                // MARK: - Position Settings
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Overlay Position")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                        ForEach(OverlayPosition.allCases) { position in
-                            PositionButton(
-                                position: position,
-                                isSelected: settings.position == position
-                            ) {
-                                settings.position = position
-                            }
-                        }
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color(.windowBackgroundColor))
-                    )
-                }
-
-                // MARK: - Actions
-                VStack(spacing: 12) {
-                    Button(action: {
-                        let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                        NSWorkspace.shared.open(url)
-                    }) {
-                        HStack {
-                            Image(systemName: "lock.shield")
-                                .font(.system(size: 14))
-                            Text("Open Privacy Settings")
-                                .font(.system(size: 13, weight: .medium))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.blue.opacity(0.1))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.blue.opacity(0.3), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    Button(action: {
-                        settings.displayDuration = 3.0
-                        settings.maxKeys = 5
-                        settings.position = .bottomRight
-                        settings.showModifiers = true
-                        settings.fontSize = 32.0
-                        settings.cornerRadius = 12.0
-                    }) {
-                        HStack {
-                            Image(systemName: "arrow.counterclockwise")
-                                .font(.system(size: 14))
-                            Text("Reset to Defaults")
-                                .font(.system(size: 13, weight: .medium))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.red.opacity(0.1))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.red.opacity(0.3), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundColor(.red)
-                }
-
-                // MARK: - Preview
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Preview")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
-                    Text("Test")
-                        .font(.system(size: CGFloat(settings.fontSize), weight: .bold, design: .rounded))
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(CGFloat(settings.cornerRadius))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: CGFloat(settings.cornerRadius))
-                                .stroke(.white.opacity(0.2), lineWidth: 1)
-                        )
-                        .padding(.horizontal)
+                VStack(spacing: 8) {
+                    Toggle("Show Modifier Keys", isOn: $settings.showModifiers)
+                        .toggleStyle(.switch)
                 }
             }
-            .padding(20)
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(.windowBackgroundColor))
+            )
         }
-        .frame(width: 420, height: 600)
+    }
+
+    private var appearanceSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Appearance Settings")
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            VStack(spacing: 20) {
+                VStack(spacing: 16) {
+                    SettingRow(
+                        title: "Font Size",
+                        value: "\(Int(settings.fontSize))",
+                        minValue: 16,
+                        maxValue: 64,
+                        step: 2,
+                        binding: $settings.fontSize
+                    )
+
+                    SettingRow(
+                        title: "Corner Radius",
+                        value: "\(Int(settings.cornerRadius))",
+                        minValue: 0,
+                        maxValue: 30,
+                        step: 2,
+                        binding: $settings.cornerRadius
+                    )
+
+                    SettingRow(
+                        title: "Border Width",
+                        value: "\(settings.borderWidth, default: "%.1f")",
+                        minValue: 0,
+                        maxValue: 5,
+                        step: 0.5,
+                        binding: $settings.borderWidth
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Background Color")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    ColorPickerRow(
+                        title: "Color",
+                        color: Binding(
+                            get: { Color(red: settings.backgroundColorRed, green: settings.backgroundColorGreen, blue: settings.backgroundColorBlue) },
+                            set: { color in
+                                if let components = color.cgColor?.components, components.count >= 3 {
+                                    settings.backgroundColorRed = Double(components[0])
+                                    settings.backgroundColorGreen = Double(components[1])
+                                    settings.backgroundColorBlue = Double(components[2])
+                                }
+                            }
+                        )
+                    )
+
+                    SettingRow(
+                        title: "Opacity",
+                        value: "\(settings.backgroundOpacity, default: "%.2f")",
+                        minValue: 0,
+                        maxValue: 1,
+                        step: 0.05,
+                        binding: $settings.backgroundOpacity
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Text Color")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    ColorPickerRow(
+                        title: "Color",
+                        color: Binding(
+                            get: { Color(red: settings.textColorRed, green: settings.textColorGreen, blue: settings.textColorBlue) },
+                            set: { color in
+                                if let components = color.cgColor?.components, components.count >= 3 {
+                                    settings.textColorRed = Double(components[0])
+                                    settings.textColorGreen = Double(components[1])
+                                    settings.textColorBlue = Double(components[2])
+                                }
+                            }
+                        )
+                    )
+
+                    SettingRow(
+                        title: "Opacity",
+                        value: "\(settings.textColorOpacity, default: "%.2f")",
+                        minValue: 0,
+                        maxValue: 1,
+                        step: 0.05,
+                        binding: $settings.textColorOpacity
+                    )
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Border Color")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    ColorPickerRow(
+                        title: "Color",
+                        color: Binding(
+                            get: { Color(red: settings.borderColorRed, green: settings.borderColorGreen, blue: settings.borderColorBlue) },
+                            set: { color in
+                                if let components = color.cgColor?.components, components.count >= 3 {
+                                    settings.borderColorRed = Double(components[0])
+                                    settings.borderColorGreen = Double(components[1])
+                                    settings.borderColorBlue = Double(components[2])
+                                }
+                            }
+                        )
+                    )
+
+                    SettingRow(
+                        title: "Opacity",
+                        value: "\(settings.borderColorOpacity, default: "%.2f")",
+                        minValue: 0,
+                        maxValue: 1,
+                        step: 0.05,
+                        binding: $settings.borderColorOpacity
+                    )
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(.windowBackgroundColor))
+            )
+        }
+    }
+
+    private var positionSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Overlay Position")
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                ForEach(OverlayPosition.allCases) { position in
+                    PositionButton(
+                        position: position,
+                        isSelected: settings.position == position
+                    ) {
+                        settings.position = position
+                    }
+                }
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(.windowBackgroundColor))
+            )
+        }
+    }
+
+
+    private var actionsSection: some View {
+        VStack(spacing: 12) {
+            Button(action: {
+                let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+                NSWorkspace.shared.open(url)
+            }) {
+                HStack {
+                    Image(systemName: "lock.shield")
+                        .font(.system(size: 14))
+                    Text("Open Privacy Settings")
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.blue.opacity(0.1))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+
+            Button(action: {
+                settings.displayDuration = 3.0
+                settings.maxKeys = 5
+                settings.position = .bottomRight
+                settings.showModifiers = true
+                settings.fontSize = 32.0
+                settings.cornerRadius = 12.0
+
+                settings.backgroundColorRed = 0.0
+                settings.backgroundColorGreen = 0.0
+                settings.backgroundColorBlue = 0.0
+                settings.backgroundOpacity = 0.3
+
+                settings.textColorRed = 1.0
+                settings.textColorGreen = 1.0
+                settings.textColorBlue = 1.0
+                settings.textColorOpacity = 1.0
+
+                settings.borderWidth = 1.0
+                settings.borderColorRed = 1.0
+                settings.borderColorGreen = 1.0
+                settings.borderColorBlue = 1.0
+                settings.borderColorOpacity = 0.2
+            }) {
+                HStack {
+                    Image(systemName: "arrow.counterclockwise")
+                        .font(.system(size: 14))
+                    Text("Reset to Defaults")
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.red.opacity(0.1))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(.red)
+        }
     }
 }
 
-// MARK: - Setting Row Component
 struct SettingRow: View {
     let title: String
     let value: String
@@ -255,7 +423,24 @@ struct SettingRow: View {
     }
 }
 
-// MARK: - Updated PositionButton
+struct ColorPickerRow: View {
+    let title: String
+    @Binding var color: Color
+
+    var body: some View {
+        HStack {
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.primary)
+
+            Spacer()
+
+            ColorPicker("", selection: $color)
+                .labelsHidden()
+        }
+    }
+}
+
 struct PositionButton: View {
     let position: OverlayPosition
     let isSelected: Bool
@@ -316,7 +501,6 @@ struct PositionButton: View {
     }
 }
 
-// MARK: - App Delegate
 class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: NSWindow!
     var monitor = KeyMonitor()
@@ -354,12 +538,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         settingsWindow = NSWindow(contentViewController: hostingController)
         settingsWindow?.title = "AfterKey Settings"
-        settingsWindow?.setContentSize(NSSize(width: 420, height: 600))
+        settingsWindow?.setContentSize(NSSize(width: 420, height: 700))
         settingsWindow?.styleMask = [.titled, .closable, .resizable]
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
 
-        // Bring to front
         NSApp.activate(ignoringOtherApps: true)
     }
 
@@ -386,7 +569,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// MARK: - Overlay View
 struct OverlayView: View {
     @EnvironmentObject var monitor: KeyMonitor
     @StateObject private var settings = SettingsManager.shared
@@ -402,13 +584,17 @@ struct OverlayView: View {
                     ForEach(monitor.recentKeys) { row in
                         Text(row.text)
                             .font(.system(size: CGFloat(settings.fontSize), weight: .bold, design: .rounded))
+                            .foregroundColor(settings.textColor)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 12)
-                            .background(.ultraThinMaterial)
+                            .background(
+                                settings.backgroundColor
+                                    .opacity(settings.backgroundOpacity)
+                            )
                             .cornerRadius(CGFloat(settings.cornerRadius))
                             .overlay(
                                 RoundedRectangle(cornerRadius: CGFloat(settings.cornerRadius))
-                                    .stroke(.white.opacity(0.2), lineWidth: 1)
+                                    .stroke(settings.borderColor, lineWidth: CGFloat(settings.borderWidth))
                             )
                             .transition(.asymmetric(
                                 insertion: .move(edge: settings.position.alignment.vertical == .top ? .top : .bottom)
@@ -427,7 +613,6 @@ struct OverlayView: View {
     }
 }
 
-// MARK: - Key Monitor
 class KeyMonitor: ObservableObject {
     @Published var recentKeys: [KeyDisplay] = []
     private let settings = SettingsManager.shared
