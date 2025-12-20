@@ -48,7 +48,7 @@ struct afterkeyApp: App {
                 .environmentObject(settings)
         }
         .windowResizability(.contentSize)
-        .defaultSize(width: 400, height: 500)
+        .defaultSize(width: 400, height: 680)
     }
 }
 
@@ -65,6 +65,8 @@ struct SettingsView: View {
                     Slider(value: $settings.displayDuration, in: 0.5...10, step: 0.5)
                 }
                 .padding(.vertical, 4)
+                // .padding(.top, 120)
+                // .padding(.bottom, 4)
 
                 Stepper("Max Items: \(settings.maxKeys)", value: $settings.maxKeys, in: 1...20)
                     .padding(.vertical, 4)
@@ -131,7 +133,7 @@ struct SettingsView: View {
             }
         }
         .padding(20)
-        .frame(width: 400, height: 500)
+        .frame(width: 400, height: 680)
     }
 }
 
@@ -217,13 +219,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create new settings window
         let settingsView = SettingsView()
             .environmentObject(SettingsManager.shared)
-            .frame(width: 400, height: 500)
+            .frame(width: 400, height: 680)
 
         let hostingController = NSHostingController(rootView: settingsView)
 
         settingsWindow = NSWindow(contentViewController: hostingController)
         settingsWindow?.title = "AfterKey Settings"
-        settingsWindow?.setContentSize(NSSize(width: 400, height: 500))
+        settingsWindow?.setContentSize(NSSize(width: 400, height: 680))
         settingsWindow?.styleMask = [.titled, .closable, .resizable]
         settingsWindow?.center()
         settingsWindow?.makeKeyAndOrderFront(nil)
