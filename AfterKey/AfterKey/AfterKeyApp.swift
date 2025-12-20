@@ -2,7 +2,6 @@ import SwiftUI
 import AppKit
 import Combine
 
-// MARK: - Enums
 enum OverlayPosition: String, CaseIterable, Identifiable {
     case topLeft, topCenter, topRight
     case centerLeft, center, centerRight
@@ -31,14 +30,12 @@ struct afterkeyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     var body: some Scene {
-        // Стандартное окно настроек SwiftUI
         // Settings {
         //     SettingsView(monitor: delegate.monitor)
         // }
     }
 }
 
-// MARK: - Delegate
 class AppDelegate: NSObject, NSApplicationDelegate {
     var overlayWindow: NSWindow!
     var monitor = KeyMonitor()
@@ -78,7 +75,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupOverlayWindow() {
         let screenFrame = NSScreen.main?.frame ?? .zero
 
-        // Исправлено: Убрали .nonactivatingPanel из styleMask, так как он вызывает ошибку 0x80
         overlayWindow = NSWindow(
             contentRect: screenFrame,
             styleMask: [.borderless, .fullSizeContentView],
@@ -93,7 +89,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         overlayWindow.ignoresMouseEvents = true
         overlayWindow.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
-        // Устанавливаем панель как неактивируемую через свойство класса, если нужно
         // Но для overlay обычно достаточно уровня окна
 
         let hostingView = NSHostingView(rootView: OverlayView().environmentObject(monitor))
@@ -102,7 +97,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// MARK: - Settings View
 struct SettingsView: View {
     @ObservedObject var monitor: KeyMonitor
 
@@ -131,7 +125,6 @@ struct SettingsView: View {
                 Text("Layout")
             }
 
-            // Кнопка для быстрого доступа к системным настройкам (Accessibility)
             Section {
                 Button("Open Privacy Settings") {
                     let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
@@ -144,7 +137,6 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Overlay View
 struct OverlayView: View {
     @EnvironmentObject var monitor: KeyMonitor
 
@@ -183,7 +175,6 @@ struct OverlayView: View {
     }
 }
 
-// MARK: - Key Monitor
 class KeyMonitor: ObservableObject {
     @Published var recentKeys: [KeyDisplay] = []
 
