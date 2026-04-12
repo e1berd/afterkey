@@ -68,7 +68,7 @@ class OverlayWindow(QWidget):
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
             | Qt.WindowType.WindowStaysOnTopHint
-            | Qt.WindowType.Tool
+            | Qt.WindowType.X11BypassWindowManagerHint
             | Qt.WindowType.WindowTransparentForInput
             | Qt.WindowType.WindowDoesNotAcceptFocus
         )

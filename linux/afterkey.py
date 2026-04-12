@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 import signal
+
+# On Wayland, WindowStaysOnTopHint and X11BypassWindowManagerHint are ignored.
+# Force XWayland (xcb backend) so the overlay behaves correctly.
+# XWayland is always running on KDE Plasma Wayland and DISPLAY=:0 is available.
+if os.environ.get("XDG_SESSION_TYPE") == "wayland":
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
