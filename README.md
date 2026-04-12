@@ -15,7 +15,7 @@ Native Swift/SwiftUI app. See [macos/](macos/) for source.
 
 ### Linux
 
-PyQt6 + evdev. Supports KDE Plasma, Wayland, X11.
+C++ / Qt6 / evdev. Supports KDE Plasma, Wayland, X11.
 See [linux/](linux/) for source and build instructions.
 
 ### Windows (alpha)

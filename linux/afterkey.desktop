@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=AfterKey
+Comment=Keystroke overlay
+Exec=afterkey
+Icon=input-keyboard
+Type=Application
+Categories=Utility;
+StartupNotify=false
