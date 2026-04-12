@@ -18,6 +18,11 @@ Native Swift/SwiftUI app. See [macos/](macos/) for source.
 PyQt6 + evdev. Supports KDE Plasma, Wayland, X11.
 See [linux/](linux/) for source and build instructions.
 
+### Windows (alpha)
+
+C# / WPF / .NET 8. Zero external dependencies.
+See [windows/](windows/) for source and build instructions.
+
 ## Features
 
 - Translucent key overlay with modifier support
